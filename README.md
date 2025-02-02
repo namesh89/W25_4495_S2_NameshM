@@ -13,5 +13,5 @@
 ## Instructor Access:
 - The instructor (kandhadaip@douglascollege.ca) has been added as a collaborator.
 
-[![Google Sheet](https://docs.google.com/spreadsheets/d/e/2PACX-1vQHzTs37sCeaieNgDgVua_POXXQw7Bqi2WpS2cD0IhkMsDLo6qHOgV9K5LdETz7IfWTbCgdNkFj1DPK/pubhtml)
-
+## Link to Work Logs Sheet:
+[![Google Sheet](https://docs.google.com/spreadsheets/d/e/2PACX-1vQHzTs37sCeaieNgDgVua_POXXQw7Bqi2WpS2cD0IhkMsDLo6qHOgV9K5LdETz7IfWTbCgdNkFj1DPK/pub?output=csv)
