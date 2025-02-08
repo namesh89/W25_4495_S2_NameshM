@@ -3,7 +3,10 @@
 ## Project Name: Automated Product Inquiry Response System for Light Recycling Program
 
 ## Team Members:
-- **Namesh Mathara Arachchi Vidanalage** (Student ID: 300359798, College Email: matharaarachchn@student.douglascollege.ca)
+- **Namesh Mathara Arachchi Vidanalage**
+      Student ID: 300359798
+      College Email: matharaarachchn@student.douglascollege.ca
+      GitHub Email: nameshm89@gmail.com
 
 ## Repository Structure:
 - `ReportsAndDocuments/` - Contains reports, proposals, and documentation.
