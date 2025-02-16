@@ -70,13 +70,19 @@ def get_image_url(product_id):
     if not product_id or str(product_id).strip() == "":
         return None  # Skip if product_id is empty
 
-    image_blob_name = f"{config.IMAGES_BLOB_DIR}{product_id}.jpg"  # Assuming images are .jpg
+    extensions = ["jpg", "jpeg", "png"]  # Possible file extensions
+    for ext in extensions:
+        image_blob_name = f"{config.IMAGES_BLOB_DIR}{product_id}.{ext}"
 
-    blob_client = blob_service_client.get_blob_client(container=config.AZURE_BLOB_CONTAINER_NAME, blob=image_blob_name)
-    if blob_client.exists():
-        return f"{BLOB_SERVICE_URL}{config.AZURE_BLOB_CONTAINER_NAME}/{image_blob_name}"
-    
-    return None  # No image found
+        blob_client = blob_service_client.get_blob_client(container=config.AZURE_BLOB_CONTAINER_NAME, blob=image_blob_name)
+        try:
+            blob_client.download_blob().readall()  # Try fetching the image
+            return f"{BLOB_SERVICE_URL}{config.AZURE_BLOB_CONTAINER_NAME}/{image_blob_name}"
+        except:
+            continue  # Try next extension
+
+    print(f"Image not found for product_id {product_id}.")
+    return None
 
 # Uploads the processed data to Azure Table Storage
 def upload_data_to_table(df):
