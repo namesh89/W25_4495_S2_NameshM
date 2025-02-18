@@ -7,12 +7,12 @@ import bcrypt
 table_service = TableServiceClient.from_connection_string(Config.AZURE_STORAGE_CONNECTION_STRING)
 user_table = table_service.get_table_client(Config.AZURE_USER_TABLE_NAME)
 
+# Generate a bcrypt hash for a given password
 def hash_password(password):
-    """Generate a bcrypt hash for a given password."""
     return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
+# Insert a user into Azure Table Storage
 def add_user(email, password):
-    """Insert a user into Azure Table Storage."""
     user_id = str(uuid.uuid4())  # Generate unique ID
     hashed_password = hash_password(password)
 
@@ -23,7 +23,7 @@ def add_user(email, password):
     user_entity["PasswordHash"] = hashed_password
 
     user_table.create_entity(user_entity)
-    print(f"✅ User {email} added successfully!")
+    print(f"User {email} added successfully!")
 
 # Run this script with example user
 if __name__ == "__main__":

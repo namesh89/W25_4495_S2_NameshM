@@ -1,0 +1,22 @@
+{% extends "base_user.html" %}
+
+{% block title %}Submit Product{% endblock %}
+
+{% block content %}
+<h2>Submit a Product Inquiry</h2>
+<form method="POST" enctype="multipart/form-data">
+    <div class="mb-3">
+        <label>Product Name</label>
+        <input type="text" name="product_name" class="form-control" required>
+    </div>
+    <div class="mb-3">
+        <label>Product Description</label>
+        <textarea name="product_description" class="form-control" required></textarea>
+    </div>
+    <div class="mb-3">
+        <label>Product Image</label>
+        <input type="file" name="product_image" class="form-control" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+{% endblock %}

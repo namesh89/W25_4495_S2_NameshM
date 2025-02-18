@@ -1,0 +1,27 @@
+{% extends "base_user.html" %}
+
+{% block title %}Submitted Products{% endblock %}
+
+{% block content %}
+<h2>Submitted Product Inquiries</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Product Name</th>
+            <th>Description</th>
+            <th>Image</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for product in user_products %}
+        <tr>
+            <td>{{ product.product_name }}</td>
+            <td>{{ product.product_description }}</td>
+            <td><img src="{{ product.product_image_url }}" width="100"></td>
+            <td>{{ product.status }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
