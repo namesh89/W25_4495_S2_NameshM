@@ -5,6 +5,7 @@ load_dotenv()
 class Config:
     SECRET_KEY = os.getenv("SECRET_KEY")
     BACKEND_URL = os.getenv("BACKEND_URL")
+    APIRS_SERVICE_API_URL = os.getenv("APIRS_SERVICE_API_URL")
 
     AZURE_STORAGE_ACCOUNT = os.getenv("AZURE_STORAGE_ACCOUNT")
     AZURE_STORAGE_KEY = os.getenv("AZURE_STORAGE_KEY")

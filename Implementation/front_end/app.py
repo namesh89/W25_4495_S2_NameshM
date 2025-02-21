@@ -91,7 +91,7 @@ def submit_product():
                 image_url = f"https://{Config.AZURE_STORAGE_ACCOUNT}.blob.core.windows.net/{Config.AZURE_CONTAINER_NAME}/{unique_filename}"
 
                 # Send data to backend API
-                response = requests.post(f"{Config.APIRS_SERVICE_API_URL}/submit-product",
+                response = requests.post(f"{Config.BACKEND_URL}/submit-product",
                                          headers={"Authorization": f"Bearer {session['token']}"},
                                          json={
                                              "user_email": session["email"],

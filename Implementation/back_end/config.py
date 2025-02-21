@@ -16,3 +16,5 @@ class Config:
 
     EXCEL_BLOB_NAME = "lightsproductguide/Products Table.xlsx"
     IMAGES_BLOB_DIR = "lightsproductimages/"
+
+    ML_MODEL_URL = os.getenv("ML_MODEL_URL")

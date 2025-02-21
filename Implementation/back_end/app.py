@@ -3,6 +3,8 @@ from azure.data.tables import TableServiceClient, TableEntity
 from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity, create_access_token
 from werkzeug.security import check_password_hash
 import uuid
+import requests
+import json
 
 from config import Config
 from utils import verify_password
@@ -85,7 +87,36 @@ def submit_product():
 
         product_table.create_entity(product_entity)
 
-        return jsonify({"message": "Product submitted successfully!", "product_id": product_id}), 201
+        # Send request to ML model app
+        payload = {
+            "product_name": product_name,
+            "product_description": product_description,
+            "product_image_url": product_image_url
+        }
+        response = requests.post(Config.ML_MODEL_URL, json=payload)
+
+        if response.status_code == 200:
+            product_category = response.json().get("product_category", "")
+            
+            # Update the Azure Table with the predicted category
+            product_entity["ProductCategory"] = product_category
+            try:
+
+                product_table.update_entity(product_entity)
+
+                return jsonify({
+                    "message": "Product submitted successfully!",
+                    "product_id": product_id,
+                    "product_category": product_category
+                }), 201
+            except Exception as ex:
+                return jsonify({"error": f"An error occurred: {str(ex)}"}), 501
+
+        else:
+            return jsonify({
+                "message": "Product submitted but category prediction failed",
+                "product_id": product_id
+            }), 201
 
     except Exception as e:
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
