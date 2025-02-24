@@ -16,7 +16,7 @@ This repository (**W25_4495_S2_NameshM**) is a mono-repo containing the code for
 - `ml_model/` - Contains the machine learning model
 - `product_upload/` - Handles product guide data uploads - **This is a one-time task needs to be done at the beginning of the project**
 
-![image]()
+![image](https://github.com/namesh89/W25_4495_S2_NameshM/blob/main/Misc/Project%20Repository%20Hierarchy.png)
 
 
 ## Installation Guide
