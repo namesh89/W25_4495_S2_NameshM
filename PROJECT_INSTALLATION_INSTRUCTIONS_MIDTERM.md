@@ -136,32 +136,9 @@ The ML Model API should now be running on `http://127.0.0.1:5002`
 
 ## Running a Demo
 1. **Upload a Product Inquiry**
-   - Use the frontend UI (`http://127.0.0.1:5001`) to login as a member and submit a product inquiry (name, description, and image). You can also view the submitted product inquries and approved product inquries.
+   - Use the frontend UI (`http://127.0.0.1:5001`) to login as a member and submit a product inquiry (name, description, and image). You can also view the submitted product inquiries and approved product inquiries.
 2. **Processing the Inquiry**
-   - The backend API (`http://127.0.0.1:5000`) processes the inquiry and store the data in Azure Table Storage (text) and Azure Blob Storage (image) then submits those data to Ml model.
+   - The backend API (`http://127.0.0.1:5000`) processes the inquiry and store the data in Azure Table Storage (text) and Azure Blob Storage (image) then submits those data to ML model.
    - The ML model (`http://127.0.0.1:5002`) performs text and image similarity matching to find the most-matched product from existing data and then passes its product category to update the same Azure Table Storage.
 3. **Approve the Product Category**
-   - Use the frontend UI (`http://127.0.0.1:5001`) to login as the admin and view pending product inquiries submitted by members. You can then review and approve the product category passed by the ML model. Once you approve, you can also view the approved product inquries.
-
-## Deployment
-For production deployment, use **Gunicorn** and **Azure App Services**:
-```sh
-gunicorn --workers=3 --bind 0.0.0.0:5000 run:app
-```
-For Azure-specific deployment steps, refer to Azure's [Flask deployment guide](https://docs.microsoft.com/en-us/azure/app-service/quickstart-python).
-
-## Contributing
-1. Fork the repository.
-2. Create a feature branch:
-   ```sh
-   git checkout -b feature-branch
-   ```
-3. Commit your changes:
-   ```sh
-   git commit -m "Added new feature"
-   ```
-4. Push to the branch:
-   ```sh
-   git push origin feature-branch
-   ```
-5. Submit a pull request for review.
+   - Use the frontend UI (`http://127.0.0.1:5001`) to login as the admin and view pending product inquiries submitted by members. You can then review and approve the product category passed by the ML model. Once you approve, you can also view the approved product inquiries.
