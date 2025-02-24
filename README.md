@@ -27,3 +27,25 @@ What they do
 - Develop transportation systems to remove recyclable waste safely and efficiently.
 - Educate communities about available recycling programs and where to take their recyclable products at end-of-life.
 - Work with recycling experts to ensure industry-leading material processing and recycling occurs.
+
+
+## Project Description
+
+**Automated Product Inquiry Response System for Light Recycling Program (APIRS)** is a **Flask-based application** designed to automate and streamline the product inquiry process using **machine learning** (A typical product inquiry seeks information about the category of a product within the recycling program). The system enables members to submit product inquiries - including product name, description, and image - which are then processed using an **ML model** that performs **text and image similarity matching** against existing products in product guide. The results are stored in **Azure Table Storage** and **Azure Blob Storage**, where administrators can review and approve the suggested product category.
+
+#### Purpose of the Project
+
+PCA handles a significant number of product inquiries daily, requiring significant manual effort to categorize and respond to each one. This project aims to **automate product inquiry processing** by leveraging **machine learning techniques** to match incoming inquiries with existing product data. The system provides:
+
+- A **user-friendly web interface** for members to submit product inquiries.
+- **Automated backend processing** to analyze and match the products.
+- A **review system** where admins can verify and approve the assigned product categories.
+
+#### Benefits of the System
+
+- **Automation**: Reduces the manual workload of categorizing product inquiries.  
+- **Efficiency**: Quickly processes and categorizes inquiries using AI.  
+- **Accuracy**: Uses machine learning to ensure precise product matching.  
+- **Scalability**: Can handle large volumes of inquiries as the business grows.  
+- **User-friendly Interface**: Both members and admins can easily interact with the system.  
+
