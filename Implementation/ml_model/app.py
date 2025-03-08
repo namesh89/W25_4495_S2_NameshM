@@ -44,30 +44,21 @@ def fetch_products_from_azure():
 
 # Method to compute similarity using NLP
 def find_best_match(new_product_name, new_product_description, products):
-    candidates = []
+    product_texts = [f"{p['product_category']} {p['product_description']}" for p in products]
+    new_product_text = f"{new_product_name} {new_product_description}"
+
+    # Encode using Sentence-BERT
+    embeddings = model.encode([new_product_text] + product_texts, convert_to_tensor=True)
     
-    for product in products:
-        comparison_texts = [
-            f"{new_product_name} {product['product_category']}",  # Criteria 1
-            f"{new_product_name} {product['product_description']}",  # Criteria 2
-            f"{new_product_description} {product['product_category']}",  # Criteria 3
-            f"{new_product_description} {product['product_description']}"  # Criteria 4
-        ]
-        
-        # Encode texts
-        embeddings = model.encode(comparison_texts, convert_to_tensor=True)
-        similarity_scores = util.pytorch_cos_sim(embeddings[0], embeddings[1:]).squeeze(0)
-        
-        # Compute average similarity across all four criteria
-        avg_score = np.mean(similarity_scores).item()
-        
-        candidates.append((product, avg_score))
-    
-    # Get the best match based on average similarity
-    if candidates:
-        best_match, best_score = max(candidates, key=lambda x: x[1])
-        return best_match, best_score * 100  # Convert to percentage
-    return None, 0
+    # Compute cosine similarity
+    similarities = util.pytorch_cos_sim(embeddings[0], embeddings[1:]).squeeze(0)
+
+    # Get best match
+    best_idx = np.argmax(similarities).item()
+    best_match = products[best_idx]
+    similarity_score = similarities[best_idx].item()
+
+    return best_match, similarity_score * 100  # Convert to percentage
 
 @app.route("/predict-category", methods=["POST"])
 def predict_category():
