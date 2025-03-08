@@ -121,6 +121,7 @@ def submit_product():
     except Exception as e:
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
 
+
 # List pending products for the logged-in user
 @app.route("/get-user-products", methods=["GET"])
 @jwt_required()
