@@ -7,6 +7,8 @@ from dotenv import load_dotenv
 from config import Config
 from azure.storage.blob import generate_blob_sas, BlobSasPermissions
 from datetime import datetime, timedelta, timezone
+from dateutil.relativedelta import relativedelta
+
 
 # Load environment variables from .env file
 load_dotenv()
@@ -90,14 +92,14 @@ def submit_product():
                 blob_client = blob_service_client.get_blob_client(container=Config.AZURE_CONTAINER_NAME, blob=blob_path)
                 blob_client.upload_blob(product_image, overwrite=True)
 
-                # Generate SAS token with read permissions and expiry time of 1 hour
+                # Generate SAS token with read permissions
                 sas_token = generate_blob_sas(
                     account_name=Config.AZURE_STORAGE_ACCOUNT,
                     container_name=Config.AZURE_CONTAINER_NAME,
                     blob_name=blob_path,
                     account_key=Config.AZURE_STORAGE_KEY,
                     permission=BlobSasPermissions(read=True),
-                    expiry=datetime.now(timezone.utc) + timedelta(hours=1)
+                    expiry=datetime.now(timezone.utc) + relativedelta(years=100)  # 100 years expiry
                 )
 
                 # Construct the SAS URL
