@@ -6,7 +6,7 @@ import requests
 from dotenv import load_dotenv
 from config import Config
 from azure.storage.blob import generate_blob_sas, BlobSasPermissions
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from dateutil.relativedelta import relativedelta
 
 

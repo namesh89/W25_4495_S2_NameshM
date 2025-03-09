@@ -17,7 +17,7 @@ BLOB_SERVICE_URL = f"https://{Config.AZURE_STORAGE_ACCOUNT_NAME}.blob.core.windo
 TABLE_SERVICE_URL = f"https://{Config.AZURE_STORAGE_ACCOUNT_NAME}.table.core.windows.net/"
 
 # Load NLP model
-model = SentenceTransformer('all-MiniLM-L6-v2')
+model = SentenceTransformer('all-MiniLM-L12-v2')
 
 # Method to fetch product data from Azure Table Storage
 def fetch_products_from_azure():
@@ -46,6 +46,10 @@ def fetch_products_from_azure():
 def find_best_match(new_product_name, new_product_description, products):
     product_texts = [f"{p['product_category']} {p['product_description']}" for p in products]
     new_product_text = f"{new_product_name} {new_product_description}"
+    #product_texts1 = [p['product_category'] for p in products]
+    #new_product_text1 = new_product_name
+    #product_texts2 = [p['product_description'] for p in products]
+    #new_product_text2 = new_product_description
 
     # Encode using Sentence-BERT
     embeddings = model.encode([new_product_text] + product_texts, convert_to_tensor=True)
