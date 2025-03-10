@@ -17,7 +17,7 @@ BLOB_SERVICE_URL = f"https://{Config.AZURE_STORAGE_ACCOUNT_NAME}.blob.core.windo
 TABLE_SERVICE_URL = f"https://{Config.AZURE_STORAGE_ACCOUNT_NAME}.table.core.windows.net/"
 
 # Load NLP model
-model = SentenceTransformer('all-MiniLM-L12-v2')
+model = SentenceTransformer('all-mpnet-base-v2')
 
 # Method to fetch product data from Azure Table Storage
 def fetch_products_from_azure():
@@ -46,21 +46,40 @@ def fetch_products_from_azure():
 def find_best_match(new_product_name, new_product_description, products):
     product_texts = [f"{p['product_category']} {p['product_description']}" for p in products]
     new_product_text = f"{new_product_name} {new_product_description}"
-    #product_texts1 = [p['product_category'] for p in products]
-    #new_product_text1 = new_product_name
-    #product_texts2 = [p['product_description'] for p in products]
-    #new_product_text2 = new_product_description
+    product_texts1 = [p['product_category'] for p in products]
+    new_product_text1 = new_product_name
+    product_texts2 = [p['product_description'] for p in products]
+    new_product_text2 = new_product_description
 
     # Encode using Sentence-BERT
     embeddings = model.encode([new_product_text] + product_texts, convert_to_tensor=True)
+    embeddings1 = model.encode([new_product_text1] + product_texts1, convert_to_tensor=True)
+    embeddings2 = model.encode([new_product_text2] + product_texts2, convert_to_tensor=True)
     
     # Compute cosine similarity
     similarities = util.pytorch_cos_sim(embeddings[0], embeddings[1:]).squeeze(0)
+    similarities1 = util.pytorch_cos_sim(embeddings1[0], embeddings1[1:]).squeeze(0)
+    similarities2 = util.pytorch_cos_sim(embeddings2[0], embeddings2[1:]).squeeze(0)
 
     # Get best match
     best_idx = np.argmax(similarities).item()
     best_match = products[best_idx]
     similarity_score = similarities[best_idx].item()
+
+    best_idx1 = np.argmax(similarities1).item()
+    best_match1 = products[best_idx1]
+    similarity_score1 = similarities1[best_idx1].item()
+
+    best_idx2 = np.argmax(similarities2).item()
+    best_match2 = products[best_idx2]
+    similarity_score2 = similarities2[best_idx2].item()
+
+    print(best_match)
+    print(similarity_score * 100)
+    print(best_match1)
+    print(similarity_score1 * 100)
+    print(best_match2)
+    print(similarity_score2 * 100)
 
     return best_match, similarity_score * 100  # Convert to percentage
 
@@ -83,9 +102,6 @@ def predict_category():
 
         # Find best match
         best_match, accuracy = find_best_match(product_name, product_description, existing_products)
-
-        print(best_match)
-        print(accuracy)
 
         # Return predicted product_category
         return jsonify({"product_category": best_match["product_category"]}), 200
