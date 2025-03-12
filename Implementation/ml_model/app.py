@@ -16,8 +16,16 @@ credential = AzureNamedKeyCredential(Config.AZURE_STORAGE_ACCOUNT_NAME, Config.A
 BLOB_SERVICE_URL = f"https://{Config.AZURE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/"
 TABLE_SERVICE_URL = f"https://{Config.AZURE_STORAGE_ACCOUNT_NAME}.table.core.windows.net/"
 
-# Load NLP model
-model = SentenceTransformer('all-mpnet-base-v2')
+# List of models to run simultaneously
+model_names = [
+    'all-MiniLM-L6-v2',
+    'all-MiniLM-L12-v2',
+    'all-mpnet-base-v2',
+    'distilbert-base-nli-stsb-mean-tokens',
+    'bert-base-nli-mean-tokens',
+    'roberta-base-nli-stsb-mean-tokens',
+    'paraphrase-multilingual-MiniLM-L12-v2'
+]
 
 # Method to fetch product data from Azure Table Storage
 def fetch_products_from_azure():
@@ -44,44 +52,42 @@ def fetch_products_from_azure():
 
 # Method to compute similarity using NLP
 def find_best_match(new_product_name, new_product_description, products):
-    product_texts = [f"{p['product_category']} {p['product_description']}" for p in products]
-    new_product_text = f"{new_product_name} {new_product_description}"
-    product_texts1 = [p['product_category'] for p in products]
-    new_product_text1 = new_product_name
-    product_texts2 = [p['product_description'] for p in products]
-    new_product_text2 = new_product_description
 
-    # Encode using Sentence-BERT
-    embeddings = model.encode([new_product_text] + product_texts, convert_to_tensor=True)
-    embeddings1 = model.encode([new_product_text1] + product_texts1, convert_to_tensor=True)
-    embeddings2 = model.encode([new_product_text2] + product_texts2, convert_to_tensor=True)
-    
-    # Compute cosine similarity
-    similarities = util.pytorch_cos_sim(embeddings[0], embeddings[1:]).squeeze(0)
-    similarities1 = util.pytorch_cos_sim(embeddings1[0], embeddings1[1:]).squeeze(0)
-    similarities2 = util.pytorch_cos_sim(embeddings2[0], embeddings2[1:]).squeeze(0)
+    for model in model_names:
 
-    # Get best match
-    best_idx = np.argmax(similarities).item()
-    best_match = products[best_idx]
-    similarity_score = similarities[best_idx].item()
+        # Load NLP model
+        model = SentenceTransformer(model)
 
-    best_idx1 = np.argmax(similarities1).item()
-    best_match1 = products[best_idx1]
-    similarity_score1 = similarities1[best_idx1].item()
+        product_texts1 = [p['product_category'] for p in products]
+        new_product_text1 = new_product_name
+        product_texts2 = [p['product_description'] for p in products]
+        new_product_text2 = new_product_description
 
-    best_idx2 = np.argmax(similarities2).item()
-    best_match2 = products[best_idx2]
-    similarity_score2 = similarities2[best_idx2].item()
+        # Encode using Sentence-BERT
+        embeddings1 = model.encode([new_product_text1] + product_texts1, convert_to_tensor=True)
+        embeddings2 = model.encode([new_product_text2] + product_texts2, convert_to_tensor=True)
+        
+        # Compute cosine similarity
+        similarities1 = util.pytorch_cos_sim(embeddings1[0], embeddings1[1:]).squeeze(0)
+        similarities2 = util.pytorch_cos_sim(embeddings2[0], embeddings2[1:]).squeeze(0)
 
-    print(best_match)
-    print(similarity_score * 100)
-    print(best_match1)
-    print(similarity_score1 * 100)
-    print(best_match2)
-    print(similarity_score2 * 100)
+        # Get best match
+        best_idx1 = np.argmax(similarities1).item()
+        best_match1 = products[best_idx1]
+        similarity_score1 = similarities1[best_idx1].item()
 
-    return best_match, similarity_score * 100  # Convert to percentage
+        best_idx2 = np.argmax(similarities2).item()
+        best_match2 = products[best_idx2]
+        similarity_score2 = similarities2[best_idx2].item()
+
+        print(f"Model: ", model)
+        print("Best Match (Category):", best_match1['product_category'])
+        print("Similarity Score (Category):", similarity_score1 * 100)
+        print("Best Match (Description):", best_match2['product_description'])
+        print("Similarity Score (Description):", similarity_score2 * 100)
+        print()
+
+    return best_match1, similarity_score1 * 100  # Convert to percentage
 
 @app.route("/predict-category", methods=["POST"])
 def predict_category():
