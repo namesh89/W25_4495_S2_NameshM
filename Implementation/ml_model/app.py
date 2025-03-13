@@ -53,6 +53,9 @@ def fetch_products_from_azure():
 # Method to compute similarity using NLP
 def find_best_match(new_product_name, new_product_description, products):
 
+    best_overall_match = None
+    best_overall_score = 0
+
     for model in model_names:
 
         # Load NLP model
@@ -80,6 +83,15 @@ def find_best_match(new_product_name, new_product_description, products):
         best_match2 = products[best_idx2]
         similarity_score2 = similarities2[best_idx2].item()
 
+        # Determine the best match overall
+        if similarity_score1 > best_overall_score:
+            best_overall_score = similarity_score1
+            best_overall_match = best_match1
+        
+        if similarity_score2 > best_overall_score:
+            best_overall_score = similarity_score2
+            best_overall_match = best_match2
+
         print(f"Model: ", model)
         print("Best Match (Category):", best_match1['product_category'])
         print("Similarity Score (Category):", similarity_score1 * 100)
@@ -87,7 +99,7 @@ def find_best_match(new_product_name, new_product_description, products):
         print("Similarity Score (Description):", similarity_score2 * 100)
         print()
 
-    return best_match1, similarity_score1 * 100  # Convert to percentage
+    return best_overall_match, best_overall_score * 100  # Convert to percentage
 
 @app.route("/predict-category", methods=["POST"])
 def predict_category():
