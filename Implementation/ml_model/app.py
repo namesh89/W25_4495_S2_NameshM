@@ -56,10 +56,10 @@ def find_best_match(new_product_name, new_product_description, products):
     best_overall_match = None
     best_overall_score = 0
 
-    for model in model_names:
+    for model_name in model_names:
 
         # Load NLP model
-        model = SentenceTransformer(model)
+        model = SentenceTransformer(model_name)
 
         product_texts1 = [p['product_category'] for p in products]
         new_product_text1 = new_product_name
@@ -92,7 +92,7 @@ def find_best_match(new_product_name, new_product_description, products):
             best_overall_score = similarity_score2
             best_overall_match = best_match2
 
-        print(f"Model: ", model)
+        print(f"Model: ", model_name)
         print("Best Match (Category):", best_match1['product_category'])
         print("Similarity Score (Category):", similarity_score1 * 100)
         print("Best Match (Description):", best_match2['product_description'])
