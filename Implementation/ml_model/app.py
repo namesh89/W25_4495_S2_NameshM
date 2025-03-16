@@ -47,7 +47,7 @@ def find_best_match(new_product_name, new_product_description, products):
 
     # Hugging Face models
     model_name_pc = 'all-mpnet-base-v2'
-    model_name_pd = 'all-MiniLM-L6-v2'
+    model_name_pd = 'bert-large-nli-stsb-mean-tokens'
 
     # Load NLP models
     model_pc = SentenceTransformer(model_name_pc)
