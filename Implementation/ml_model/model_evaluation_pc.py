@@ -9,10 +9,13 @@ models = [
     'all-MiniLM-L6-v2',
     'all-MiniLM-L12-v2',
     'all-mpnet-base-v2',
-    'distilbert-base-nli-stsb-mean-tokens',
     'bert-base-nli-mean-tokens',
+    'bert-large-nli-stsb-mean-tokens',
+    'distilbert-base-nli-stsb-mean-tokens',
     'roberta-base-nli-stsb-mean-tokens',
-    'paraphrase-multilingual-MiniLM-L12-v2'
+    'roberta-large-nli-stsb-mean-tokens',
+    'paraphrase-multilingual-MiniLM-L12-v2',
+    'distiluse-base-multilingual-cased-v2'
 ]
 
 # Existing product categories
