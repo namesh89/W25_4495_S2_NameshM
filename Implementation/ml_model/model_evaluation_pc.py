@@ -40,25 +40,25 @@ existing_product_category = [
 
 # New product names
 new_product_name = [
-    "Philips 18-inch T8 Fluorescent Tube 15W",
-    "GE 36-inch T8 Fluorescent Tube 30W",
-    "Sylvania 60-inch T12 Fluorescent Tube 40W",
-    "Osram 13W Spiral CFL Bulb",
-    "Cree 10W A19 LED Bulb",
-    "Philips 4-ft LED Tube Light 18W",
-    "GE 250W Metal Halide HID Lamp",
-    "Sylvania 72W Halogen Soft White Bulb",
-    "Philips 5W Miniature E10 Indicator Bulb",
-    "Holiday Bright LED Decorative String Lights 20ft",
-    "Black+Decker Rechargeable LED Work Light",
-    "Lithonia LED Exit Sign Emergency Light Combo",
-    "Hampton Bay 12-inch Outdoor Wall Lantern",
-    "Kichler Crystal Mini Pendant Light",
-    "Hunter 52-inch LED Ceiling Fan with Light",
-    "Lithonia 48-inch LED Linear Shop Light",
-    "GE High Bay LED Fixture 200W",
-    "Philips 300W LED Parking Lot Light",
-    "Advance ICN-2S40-N T8 Electronic Ballast"
+    "T8 18-inch Fluorescent Tube Light",
+    "T5 3-ft Fluorescent Tube for Office Lighting",
+    "T12 5-ft Fluorescent Tube for Warehouse Use",
+    "Philips 13W Spiral CFL Bulb",
+    "GE 10W LED A19 Bulb",
+    "T8 4-ft LED Tube Light for Commercial Use",
+    "Metal Halide 400W HID Lamp for Stadium Lighting",
+    "GE 43W Halogen A19 Bulb",
+    "12V LED Miniature Bulb for Automotive Dashboard",
+    "LED Warm White String Lights for Holiday Decoration",
+    "Rechargeable LED Work Light with Handle",
+    "Lithonia LED Exit Sign with Battery Backup",
+    "Solar-Powered LED Wall Lantern for Outdoor Use",
+    "Crystal Chandelier Pendant Light for Dining Room",
+    "Hunter 52-inch Ceiling Fan with LED Light Kit",
+    "4-ft LED Shop Light for Garages",
+    "High Bay LED Light for Warehouse Applications",
+    "Streetlight LED Fixture for Highway Lighting",
+    "Advance T8 Electronic Ballast for Fluorescent Tubes"
 ]
 
 # Ground truth mapping (expected indices of correct matches)
