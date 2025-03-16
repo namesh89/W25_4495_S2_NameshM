@@ -16,17 +16,6 @@ credential = AzureNamedKeyCredential(Config.AZURE_STORAGE_ACCOUNT_NAME, Config.A
 BLOB_SERVICE_URL = f"https://{Config.AZURE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/"
 TABLE_SERVICE_URL = f"https://{Config.AZURE_STORAGE_ACCOUNT_NAME}.table.core.windows.net/"
 
-# List of models to run simultaneously
-model_names = [
-    'all-MiniLM-L6-v2',
-    'all-MiniLM-L12-v2',
-    'all-mpnet-base-v2',
-    'distilbert-base-nli-stsb-mean-tokens',
-    'bert-base-nli-mean-tokens',
-    'roberta-base-nli-stsb-mean-tokens',
-    'paraphrase-multilingual-MiniLM-L12-v2'
-]
-
 # Method to fetch product data from Azure Table Storage
 def fetch_products_from_azure():
     try:
@@ -56,48 +45,50 @@ def find_best_match(new_product_name, new_product_description, products):
     best_overall_match = None
     best_overall_score = 0
 
-    for model_name in model_names:
+    # Hugging Face models
+    model_name_pc = 'all-mpnet-base-v2'
+    model_name_pd = 'all-MiniLM-L6-v2'
 
-        # Load NLP model
-        model = SentenceTransformer(model_name)
+    # Load NLP models
+    model_pc = SentenceTransformer(model_name_pc)
+    model_pd = SentenceTransformer(model_name_pd)
 
-        product_texts1 = [p['product_category'] for p in products]
-        new_product_text1 = new_product_name
-        product_texts2 = [p['product_description'] for p in products]
-        new_product_text2 = new_product_description
+    product_texts_pc = [p['product_category'] for p in products]
+    new_product_text_pc = new_product_name
+    product_texts_pd = [p['product_description'] for p in products]
+    new_product_text_pd = new_product_description
 
-        # Encode using Sentence-BERT
-        embeddings1 = model.encode([new_product_text1] + product_texts1, convert_to_tensor=True)
-        embeddings2 = model.encode([new_product_text2] + product_texts2, convert_to_tensor=True)
+    # Encode using Sentence-BERT
+    embeddings_pc = model_pc.encode([new_product_text_pc] + product_texts_pc, convert_to_tensor=True)
+    embeddings_pd = model_pd.encode([new_product_text_pd] + product_texts_pd, convert_to_tensor=True)
         
-        # Compute cosine similarity
-        similarities1 = util.pytorch_cos_sim(embeddings1[0], embeddings1[1:]).squeeze(0)
-        similarities2 = util.pytorch_cos_sim(embeddings2[0], embeddings2[1:]).squeeze(0)
+    # Compute cosine similarity
+    similarities_pc = util.pytorch_cos_sim(embeddings_pc[0], embeddings_pc[1:]).squeeze(0)
+    similarities_pd = util.pytorch_cos_sim(embeddings_pd[0], embeddings_pd[1:]).squeeze(0)
 
-        # Get best match
-        best_idx1 = np.argmax(similarities1).item()
-        best_match1 = products[best_idx1]
-        similarity_score1 = similarities1[best_idx1].item()
+    # Get best match
+    best_id_pc = np.argmax(similarities_pc).item()
+    best_match_pc = products[best_id_pc]
+    similarity_score_pc = similarities_pc[best_id_pc].item()
 
-        best_idx2 = np.argmax(similarities2).item()
-        best_match2 = products[best_idx2]
-        similarity_score2 = similarities2[best_idx2].item()
+    best_id_pd = np.argmax(similarities_pd).item()
+    best_match_pd = products[best_id_pd]
+    similarity_score_pd = similarities_pd[best_id_pd].item()
 
-        # Determine the best match overall
-        if similarity_score1 > best_overall_score:
-            best_overall_score = similarity_score1
-            best_overall_match = best_match1
+    # Determine the best match overall
+    if similarity_score_pc > best_overall_score:
+        best_overall_score = similarity_score_pc
+        best_overall_match = best_match_pc
         
-        if similarity_score2 > best_overall_score:
-            best_overall_score = similarity_score2
-            best_overall_match = best_match2
+    if similarity_score_pd > best_overall_score:
+        best_overall_score = similarity_score_pd
+        best_overall_match = best_match_pd
 
-        print(f"Model: ", model_name)
-        print("Best Match (Category):", best_match1['product_category'])
-        print("Similarity Score (Category):", similarity_score1 * 100)
-        print("Best Match (Description):", best_match2['product_description'])
-        print("Similarity Score (Description):", similarity_score2 * 100)
-        print()
+    print("Best Match (based on Category):", best_match_pc)
+    print("Similarity Score (based on Category):", similarity_score_pc * 100)
+    print("Best Match (based on Description):", best_match_pd)
+    print("Similarity Score (based on Description):", similarity_score_pd * 100)
+    print()
 
     return best_overall_match, best_overall_score * 100  # Convert to percentage
 

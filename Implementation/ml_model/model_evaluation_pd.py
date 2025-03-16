@@ -178,7 +178,7 @@ def evaluate_model(model_name, k=5):
 # Evaluate all models and store results
 results = []
 for model in models:
-    model_name, top_k_acc, mrr = evaluate_model(model, k=3)
+    model_name, top_k_acc, mrr = evaluate_model(model, k=5)
     results.append([model_name, top_k_acc, mrr])
 
 # Convert results to DataFrame and display
