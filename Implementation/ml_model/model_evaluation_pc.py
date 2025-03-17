@@ -14,8 +14,7 @@ models = [
     'distilbert-base-nli-stsb-mean-tokens',
     'roberta-base-nli-stsb-mean-tokens',
     'roberta-large-nli-stsb-mean-tokens',
-    'paraphrase-multilingual-MiniLM-L12-v2',
-    'distiluse-base-multilingual-cased-v2'
+    'paraphrase-multilingual-MiniLM-L12-v2'
 ]
 
 # Existing product categories
