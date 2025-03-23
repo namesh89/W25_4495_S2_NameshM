@@ -215,22 +215,22 @@ def admin_approve_product(product_id):
         "Fluorescent tubes measuring less than or equal to 2 ft", 
         "Fluorescent tubes measuring greater than 2 ft and up to or equal to 4 ft", 
         "Fluorescent tubes measuring greater than 4 ft", 
-        "Compact Fluorescent Lights (CFL) / Screw-In Induction Lamps", 
+        "Compact Fluorescent Lights (CFL) or Screw-In Induction Lamps", 
         "Light Emitting Diodes (LED) - Bulbs",
         "Light Emitting Diodes (LED) - Tubes and Other", 
         "High Intensity Discharge (HID), Germicidal, Special Purpose and Other", 
-        "Incandescent / Halogen", 
+        "Incandescent or Halogen", 
         "Miniature Bulb Package",
-        "Designated Small Fixtures / Decorative Light Strings", 
+        "Designated Small Fixtures or Decorative Light Strings", 
         "Fixture Category A - Portable Fixtures with a plug, cord, or battery", 
-        "Fixture Category A - Emergency / Egress Lights", 
+        "Fixture Category A - Emergency or Egress Lights", 
         "Fixture Category A - Small Outdoor Fixtures",
         "Fixture Category A - Decorative Fixtures", 
         "Fixture Category A - Chandeliers and Ceiling Fans", 
-        "Fixture Category A - Linear Fixtures (including linear shop lights and linear pool / fountain fixtures)", 
+        "Fixture Category A - Linear Fixtures (including linear shop lights and linear pool or fountain fixtures)", 
         "Fixture Category B - Non-Linear Fixtures (commercial and industrial)", 
         "Large Outdoor Fixtures Designed for use in institutional, commercial, and industrial settings", 
-        "Lighting Ballasts / Transformers (not integrated into lamps or fixtures)"
+        "Lighting Ballasts or Transformers (not integrated into lamps or fixtures)"
         ]
 
     return render_template("admin_approve_product.html", product=product, categories=categories)
