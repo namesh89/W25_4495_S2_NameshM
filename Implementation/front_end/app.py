@@ -85,8 +85,6 @@ def submit_product():
             # Define the full blob path (folder + filename)
             blob_path = f"{Config.AZURE_UPLOAD_FOLDER}/{unique_filename}"  # e.g., lightsproductimages_inquiries/uuid-filename.jpg
 
-            print(blob_path)
-
             # Upload image to Azure Blob Storage
             try:
                 blob_client = blob_service_client.get_blob_client(container=Config.AZURE_CONTAINER_NAME, blob=blob_path)
@@ -104,8 +102,6 @@ def submit_product():
 
                 # Construct the SAS URL
                 image_url = f"https://{Config.AZURE_STORAGE_ACCOUNT}.blob.core.windows.net/{Config.AZURE_CONTAINER_NAME}/{blob_path}?{sas_token}"
-
-                print(image_url)
 
                 # Send data to backend API
                 response = requests.post(f"{Config.BACKEND_URL}/submit-product",

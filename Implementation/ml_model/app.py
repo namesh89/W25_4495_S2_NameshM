@@ -167,7 +167,8 @@ def predict_category():
         #best_match, accuracy = find_best_match(product_name, product_description, product_image_url, existing_products)
         best_match, accuracy = find_best_match_image(product_image_url, existing_products)
 
-        print(best_match["product_category"])
+        print()
+        print(best_match)
         print(accuracy)
         print()
 
