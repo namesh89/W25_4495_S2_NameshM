@@ -105,6 +105,8 @@ def submit_product():
                 # Construct the SAS URL
                 image_url = f"https://{Config.AZURE_STORAGE_ACCOUNT}.blob.core.windows.net/{Config.AZURE_CONTAINER_NAME}/{blob_path}?{sas_token}"
 
+                print(image_url)
+
                 # Send data to backend API
                 response = requests.post(f"{Config.BACKEND_URL}/submit-product",
                                          headers={"Authorization": f"Bearer {session['token']}"},

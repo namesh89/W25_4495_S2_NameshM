@@ -5,16 +5,16 @@ import numpy as np
 from config import Config
 from azure.core.credentials import AzureNamedKeyCredential
 
-#import requests
-#from PIL import Image
-#from io import BytesIO
-#from tensorflow.keras.applications.resnet50 import ResNet50, preprocess_input
-#from tensorflow.keras.preprocessing import image
-#from sklearn.metrics.pairwise import cosine_similarity
-#from tensorflow.keras.models import Model
+import requests
+from PIL import Image
+from io import BytesIO
+from tensorflow.keras.applications.resnet50 import ResNet50, preprocess_input
+from tensorflow.keras.preprocessing import image
+from sklearn.metrics.pairwise import cosine_similarity
+from tensorflow.keras.models import Model
 
-import os
-os.environ["TRANSFORMERS_NO_TF"] = "1"
+#import os
+#os.environ["TRANSFORMERS_NO_TF"] = "1"
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -29,6 +29,9 @@ TABLE_SERVICE_URL = f"https://{Config.AZURE_STORAGE_ACCOUNT_NAME}.table.core.win
 # Load SBERT models
 model_pc = SentenceTransformer('all-mpnet-base-v2')
 model_pd = SentenceTransformer('bert-large-nli-stsb-mean-tokens')
+
+# Load ResNet50 model (without top layer, for feature extraction)
+model_img = ResNet50(weights='imagenet', include_top=False, pooling='avg')
 
 
 # Method to fetch product data from Azure Table Storage
@@ -102,6 +105,47 @@ def find_best_match(new_product_name, new_product_description, new_product_image
     return best_overall_match, best_overall_score * 100  # Convert to percentage
 
 
+def find_best_match_image(new_product_image_url, products):
+
+    best_score = 0
+    best_match = None
+
+    # Preprocess new image
+    try:
+        response = requests.get(new_product_image_url, timeout=10)
+        img = Image.open(BytesIO(response.content)).convert('RGB')
+        img = img.resize((224, 224))
+        img_array = image.img_to_array(img)
+        img_array = np.expand_dims(img_array, axis=0)
+        img_array = preprocess_input(img_array)
+        new_features = model_img.predict(img_array)
+    except Exception as e:
+        print(f"Error processing new product image: {e}")
+        return None, 0
+
+    for product in products:
+        try:
+            response = requests.get(product['image_url'], timeout=10)
+            img = Image.open(BytesIO(response.content)).convert('RGB')
+            img = img.resize((224, 224))
+            img_array = image.img_to_array(img)
+            img_array = np.expand_dims(img_array, axis=0)
+            img_array = preprocess_input(img_array)
+            existing_features = model_img.predict(img_array)
+
+            similarity = cosine_similarity(new_features, existing_features)[0][0]
+
+            if similarity > best_score:
+                best_score = similarity
+                best_match = product
+
+        except Exception as e:
+            print(f"Error processing existing product image ({product.get('image_url')}): {e}")
+            continue
+
+    return best_match, best_score * 100  # Convert to percentage
+
+
 @app.route("/predict-category", methods=["POST"])
 def predict_category():
     try:
@@ -120,7 +164,8 @@ def predict_category():
             return jsonify({"error": "No products found in database"}), 500
 
         # Find best match
-        best_match, accuracy = find_best_match(product_name, product_description, product_image_url, existing_products)
+        #best_match, accuracy = find_best_match(product_name, product_description, product_image_url, existing_products)
+        best_match, accuracy = find_best_match_image(product_image_url, existing_products)
 
         print(best_match["product_category"])
         print(accuracy)

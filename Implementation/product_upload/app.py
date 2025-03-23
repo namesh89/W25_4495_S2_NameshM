@@ -7,6 +7,9 @@ from dotenv import load_dotenv
 from azure.core.credentials import AzureNamedKeyCredential
 from config import config
 from flask import Flask
+from azure.storage.blob import generate_blob_sas, BlobSasPermissions
+from datetime import datetime, timezone
+from dateutil.relativedelta import relativedelta
 
 app = Flask(__name__)
 app.config.from_object(config)
@@ -74,9 +77,24 @@ def get_image_url(product_id):
         image_blob_name = f"{config.IMAGES_BLOB_DIR}{product_id}.{ext}"
 
         blob_client = blob_service_client.get_blob_client(container=config.AZURE_BLOB_CONTAINER_NAME, blob=image_blob_name)
+
         try:
+            # Generate SAS token with read permissions
+            sas_token = generate_blob_sas(
+                account_name=config.AZURE_STORAGE_ACCOUNT_NAME,
+                container_name=config.AZURE_BLOB_CONTAINER_NAME,
+                blob_name=image_blob_name,
+                account_key=config.AZURE_STORAGE_ACCOUNT_KEY,
+                permission=BlobSasPermissions(read=True),
+                expiry=datetime.now(timezone.utc) + relativedelta(years=100)  # 100 years expiry
+            )
+
+            # Construct the SAS URL
+            image_url = f"https://{config.AZURE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/{config.AZURE_BLOB_CONTAINER_NAME}/{image_blob_name}?{sas_token}"
+
             blob_client.download_blob().readall()  # Try fetching the image
-            return f"{BLOB_SERVICE_URL}{config.AZURE_BLOB_CONTAINER_NAME}/{image_blob_name}"
+            return image_url
+        
         except:
             continue  # Try next extension
 
