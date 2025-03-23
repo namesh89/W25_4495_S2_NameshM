@@ -13,8 +13,8 @@ from azure.core.credentials import AzureNamedKeyCredential
 #from sklearn.metrics.pairwise import cosine_similarity
 #from tensorflow.keras.models import Model
 
-#import os
-#os.environ["TRANSFORMERS_NO_TF"] = "1"
+import os
+os.environ["TRANSFORMERS_NO_TF"] = "1"
 
 app = Flask(__name__)
 app.config.from_object(Config)
