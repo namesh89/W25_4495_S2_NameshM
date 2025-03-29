@@ -164,8 +164,8 @@ def predict_category():
             return jsonify({"error": "No products found in database"}), 500
 
         # Find best match
-        #best_match, accuracy = find_best_match(product_name, product_description, product_image_url, existing_products)
-        best_match, accuracy = find_best_match_image(product_image_url, existing_products)
+        best_match, accuracy = find_best_match(product_name, product_description, product_image_url, existing_products)
+        #best_match, accuracy = find_best_match_image(product_image_url, existing_products)
 
         print()
         print(best_match)
