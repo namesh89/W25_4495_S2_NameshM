@@ -164,16 +164,28 @@ def predict_category():
             return jsonify({"error": "No products found in database"}), 500
 
         # Find best match
-        #best_match, accuracy = find_best_match(product_name, product_description, product_image_url, existing_products)
-        best_match, accuracy = find_best_match_image(product_image_url, existing_products)
+        best_match, accuracy = find_best_match(product_name, product_description, product_image_url, existing_products)
+        best_match_image, accuracy_image = find_best_match_image(product_image_url, existing_products)
+
+        best_overall_match = None
+        best_overall_accuracy = 0
+
+        # Determine the best match overall
+        if accuracy > best_overall_accuracy:
+            best_overall_accuracy = accuracy
+            best_overall_match = best_match
+            
+        if accuracy_image > best_overall_accuracy:
+            best_overall_accuracy = accuracy_image
+            best_overall_match = best_match_image
 
         print()
-        print(best_match)
-        print(accuracy)
+        print(best_overall_match)
+        print(best_overall_accuracy)
         print()
 
         # Return predicted product_category
-        return jsonify({"product_category": best_match["product_category"]}), 200
+        return jsonify({"product_category": best_overall_match["product_category"]}), 200
 
     except Exception as e:
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
