@@ -38,6 +38,18 @@ def download_excel_from_blob():
         download_stream = blob_client.download_blob().readall()
         df = pd.read_excel(io.BytesIO(download_stream), engine='openpyxl')
 
+        # Original row count
+        total_rows = len(df)
+
+        # Filter rows where 'product_id' is not null or empty
+        df = df[df['product_id'].notna() & (df['product_id'].astype(str).str.strip() != '')]
+
+        # Filtered row count
+        filtered_rows = len(df)
+        removed_rows = total_rows - filtered_rows
+
+        print(f"{removed_rows} rows were filtered out due to missing or empty 'product_id'. {filtered_rows} rows returned.")
+
         return df
 
     except Exception as e:
