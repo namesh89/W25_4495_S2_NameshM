@@ -1,15 +1,22 @@
 import io
 import pandas as pd
 import uuid
-from azure.storage.blob import BlobServiceClient
+from azure.storage.blob import BlobServiceClient, generate_blob_sas, BlobSasPermissions
 from azure.data.tables import TableServiceClient
-from dotenv import load_dotenv
 from azure.core.credentials import AzureNamedKeyCredential
-from config import config
-from flask import Flask
-from azure.storage.blob import generate_blob_sas, BlobSasPermissions
 from datetime import datetime, timezone
 from dateutil.relativedelta import relativedelta
+from flask import Flask
+import numpy as np
+import base64
+import requests
+from PIL import Image
+from tensorflow.keras.applications.resnet50 import ResNet50, preprocess_input
+from tensorflow.keras.preprocessing import image
+from sentence_transformers import SentenceTransformer
+from config import config
+from io import BytesIO
+
 
 app = Flask(__name__)
 app.config.from_object(config)
@@ -25,6 +32,14 @@ TABLE_SERVICE_URL = f"https://{config.AZURE_STORAGE_ACCOUNT_NAME}.table.core.win
 blob_service_client = BlobServiceClient(account_url=BLOB_SERVICE_URL, credential=config.AZURE_STORAGE_ACCOUNT_KEY)
 table_service_client = TableServiceClient(endpoint=TABLE_SERVICE_URL, credential=credential)
 table_client = table_service_client.get_table_client(table_name=config.AZURE_TABLE_NAME)
+
+# Models for embeddings
+model_pc = SentenceTransformer('all-mpnet-base-v2')
+model_pd = SentenceTransformer('bert-large-nli-stsb-mean-tokens')
+model_img = ResNet50(weights='imagenet', include_top=False, pooling='avg')
+
+def encode_array(arr):
+    return base64.b64encode(arr.astype(np.float32).tobytes()).decode('utf-8')
 
 # Downloads the Excel file from Azure Blob Storage and loads it into a DataFrame
 def download_excel_from_blob():
@@ -125,10 +140,29 @@ def delete_all_records_in_table():
     except Exception as e:
         print(f"Error deleting existing records: {e}")
 
+def compute_image_embedding(image_url):
+    try:
+        response = requests.get(image_url, timeout=10)
+        img = Image.open(BytesIO(response.content)).convert('RGB')
+        img = img.resize((224, 224))
+        img_array = image.img_to_array(img)
+        img_array = np.expand_dims(img_array, axis=0)
+        img_array = preprocess_input(img_array)
+        return model_img.predict(img_array)[0]
+    except Exception as e:
+        print(f"Error processing image {image_url}: {e}")
+        return np.zeros((2048,), dtype=np.float32)
+
 # Uploads the processed data to Azure Table Storage
 def upload_data_to_table(df):
     for index, row in df.iterrows():
         try:
+            # Compute embeddings
+            pc_embedding = model_pc.encode(row["product_category"])
+            pd_embedding = model_pd.encode(row["product_description"] if pd.notna(row["product_description"]) else "")
+            img_embedding = compute_image_embedding(row["image_url"]) if row["image_url"] else np.zeros((2048,), dtype=np.float32)
+
+            # Build the entity for Azure Table Storage
             entity = {
                 "PartitionKey": row["product_category"],  # Use product_category as PartitionKey
                 "RowKey": row["RowKey"],  # Use either product_id or generated UUID as RowKey
@@ -140,9 +174,17 @@ def upload_data_to_table(df):
                 "ontario": row["ontario"] if pd.notna(row["ontario"]) else "",
                 "prince_edward_island": row["prince_edward_island"] if pd.notna(row["prince_edward_island"]) else "",
                 "quebec": row["quebec"] if pd.notna(row["quebec"]) else "",
-                "image_url": row["image_url"] if pd.notna(row["image_url"]) else ""
+                "image_url": row["image_url"] if pd.notna(row["image_url"]) else "",
+
+                # Encode and store embeddings
+                "text_embedding_pc": encode_array(pc_embedding),
+                "text_embedding_pd": encode_array(pd_embedding),
+                "image_embedding": encode_array(img_embedding)
             }
-            table_client.upsert_entity(entity)  # Insert or update entity in Azure Table Storage
+
+            # Upload to Azure Table Storage
+            table_client.upsert_entity(entity)
+
         except Exception as e:
             print(f"Error uploading row {index} (RowKey: {row['RowKey']}): {e}")
 
