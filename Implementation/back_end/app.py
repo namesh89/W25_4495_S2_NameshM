@@ -1,10 +1,11 @@
 from flask import Flask, request, jsonify
 from azure.data.tables import TableServiceClient, TableEntity
-from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity, create_access_token
+from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity, create_access_token, get_jwt
 from werkzeug.security import check_password_hash
+from datetime import datetime
 import uuid
 import requests
-import json
+import pprint
 
 from config import Config
 from utils import verify_password
@@ -48,7 +49,7 @@ def login():
         role = "admin" if email.lower() == "admin@test.com" else "user"
 
         # Generate JWT token
-        access_token = create_access_token(identity=user["RowKey"])
+        access_token = create_access_token(identity=user["RowKey"], additional_claims={"email": email})
         return jsonify({
             "message": "Login successful", 
             "token": access_token,
@@ -65,7 +66,9 @@ def login():
 def submit_product():
     try:
         data = request.get_json()
-        user_email = get_jwt_identity()  # Get user email from JWT
+        user_key = get_jwt_identity()  # Get user email from JWT
+        claims = get_jwt()
+        user_email = claims.get("email")
         product_name = data.get("product_name")
         product_description = data.get("product_description")
         product_image_url = data.get("product_image_url")
@@ -74,16 +77,19 @@ def submit_product():
             return jsonify({"error": "Missing required fields"}), 400
 
         product_id = str(uuid.uuid4())
+        submitted_date = datetime.now().isoformat()
 
         # Save to Azure Table Storage
         product_entity = TableEntity()
-        product_entity["PartitionKey"] = user_email
+        product_entity["PartitionKey"] = user_key
+        product_entity["UserEmail"] = user_email
         product_entity["RowKey"] = product_id
         product_entity["ProductName"] = product_name
         product_entity["ProductDescription"] = product_description
         product_entity["ProductImageUrl"] = product_image_url
         product_entity["ProductCategory"] = ""
         product_entity["Status"] = "Pending"
+        product_entity["SubmittedDate"] = submitted_date
 
         product_table.create_entity(product_entity)
 
@@ -131,6 +137,8 @@ def get_user_products():
     # Query Azure Table Storage for user's pending products
     query = f"PartitionKey eq '{user_email}' and Status eq 'Pending'"
     products = list(product_table.query_entities(query))
+    
+    pprint.pprint(products)
 
     product_list = [{
         "product_id": product["RowKey"],
@@ -138,6 +146,7 @@ def get_user_products():
         "product_description": product["ProductDescription"],
         "product_image_url": product["ProductImageUrl"],
         "product_category": product["ProductCategory"],
+        "submitted_datetime": datetime.fromisoformat(product.get("SubmittedDate", "")).strftime("%Y-%m-%d %H:%M:%S"),
         "status": product["Status"]
     } for product in products]
 
@@ -159,6 +168,10 @@ def get_approved_products():
         "product_description": product["ProductDescription"],
         "product_image_url": product["ProductImageUrl"],
         "product_category": product["ProductCategory"],
+        "approved_product_category": product["ApprovedProductCategory"],
+        "submitted_datetime": datetime.fromisoformat(product.get("SubmittedDate", "")).strftime("%Y-%m-%d %H:%M:%S"),
+        "approved_datetime": datetime.fromisoformat(product.get("ApprovedDate", "")).strftime("%Y-%m-%d %H:%M:%S"),
+        "user_email": product["UserEmail"],
         "status": product["Status"]
     } for product in products]
 
@@ -177,11 +190,12 @@ def admin_get_pending_products():
 
     product_list = [{
         "product_id": product["RowKey"],
-        "user_email": product["PartitionKey"],
+        "user_email": product["UserEmail"],
         "product_name": product["ProductName"],
         "product_description": product["ProductDescription"],
         "product_image_url": product["ProductImageUrl"],
         "product_category": product["ProductCategory"],
+        "submitted_datetime": datetime.fromisoformat(product.get("SubmittedDate", "")).strftime("%Y-%m-%d %H:%M:%S"),
         "status": product["Status"]
     } for product in products]
 
@@ -200,11 +214,14 @@ def admin_get_approved_products():
 
     product_list = [{
         "product_id": product["RowKey"],
-        "user_email": product["PartitionKey"],
+        "user_email": product["UserEmail"],
         "product_name": product["ProductName"],
         "product_description": product["ProductDescription"],
         "product_image_url": product["ProductImageUrl"],
         "product_category": product["ProductCategory"],
+        "approved_category": product["ApprovedProductCategory"],
+        "submitted_datetime": datetime.fromisoformat(product.get("SubmittedDate", "")).strftime("%Y-%m-%d %H:%M:%S"),
+        "approved_datetime": datetime.fromisoformat(product.get("ApprovedDate", "")).strftime("%Y-%m-%d %H:%M:%S"),
         "status": product["Status"]
     } for product in products]
 
@@ -234,9 +251,11 @@ def approve_product():
             return jsonify({"error": "Product not found"}), 404
 
         product = products[0]  # There should be only one match
+        approved_date = datetime.now().isoformat()
 
         # Update the product category and status
-        product["ProductCategory"] = new_category
+        product["ApprovedProductCategory"] = new_category
+        product["ApprovedDate"] = approved_date
         product["Status"] = "Approved"
 
         product_table.update_entity(product, mode="merge")

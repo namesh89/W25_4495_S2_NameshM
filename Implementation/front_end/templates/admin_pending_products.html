@@ -7,16 +7,20 @@
 <table class="table">
     <thead>
         <tr>
+            <th>Submitted Date</th>
+            <th>User Email</th>
             <th>Product Name</th>
             <th>Description</th>
             <th>Image</th>
-            <th>Category</th>
+            <th>Recommended Category</th>
             <th>Actions</th>
         </tr>
     </thead>
     <tbody>
         {% for product in pending_products %}
         <tr>
+            <td>{{ product.submitted_datetime }}</td>
+            <td>{{ product.user_email }}</td>
             <td>{{ product.product_name }}</td>
             <td>{{ product.product_description }}</td>
             <td><img src="{{ product.product_image_url }}" width="100"></td>
