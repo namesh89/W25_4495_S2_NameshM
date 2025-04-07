@@ -4,13 +4,13 @@
 
 {% block content %}
 <h2>Approved Product Inquiries</h2>
-<table class="table">
+<table class="table" id="approved-product-table">
     <thead>
         <tr>
-            <th>Submitted Date</th>
-            <th>Approved Date</th>
-            <th>User Email</th>
-            <th>Product Name</th>
+            <th style="cursor: pointer;" onclick="sortTable(0)">Submitted Date</th>
+            <th style="cursor: pointer;" onclick="sortTable(1)">Approved Date</th>
+            <th style="cursor: pointer;" onclick="sortTable(2)">User Email</th>
+            <th style="cursor: pointer;" onclick="sortTable(3)">Product Name</th>
             <th>Description</th>
             <th>Image</th>
             <th>Recommended Category</th>
@@ -32,4 +32,92 @@
         {% endfor %}
     </tbody>
 </table>
+
+<style>
+    th.ascending::after {
+        content: " ↑"; /* Add an arrow for ascending order */
+    }
+
+    th.descending::after {
+        content: " ↓"; /* Add an arrow for descending order */
+    }
+</style>
+
+<script>
+    // Object to keep track of sorting directions for each column
+    const sortDirections = {
+        0: 'asc',  // Initially, the 'Submitted Date' column is sorted in ascending order
+        1: 'asc',  // Initially, the 'Approved Date' column is sorted in ascending order
+        2: 'asc',   // Initially, the 'User Email' column is sorted in ascending order
+        3: 'asc'   // Initially, the 'Product Name' column is sorted in ascending order
+    };
+
+    function sortTable(columnIndex) {
+        const table = document.getElementById("approved-product-table");
+        const rows = Array.from(table.rows).slice(1); // Get all rows excluding the header
+        
+        // Determine the current sorting direction
+        const currentDirection = sortDirections[columnIndex];
+        
+        // Toggle the sorting direction: 'asc' -> 'desc' or 'desc' -> 'asc'
+        const newDirection = currentDirection === 'asc' ? 'desc' : 'asc';
+        sortDirections[columnIndex] = newDirection;  // Update the sort direction for this column
+
+        // Sort rows based on the column index
+        rows.sort((a, b) => {
+            const cellA = a.cells[columnIndex].innerText.trim();
+            const cellB = b.cells[columnIndex].innerText.trim();
+
+            if (columnIndex === 0) {
+                // Handle sorting for 'Submitted Date' column (Date sorting)
+                const dateA = new Date(cellA);
+                const dateB = new Date(cellB);
+                return newDirection === 'asc' ? dateA - dateB : dateB - dateA;
+            } else if (columnIndex === 1) {
+                // Handle sorting for 'Approved Date' column (Date sorting)
+                const dateA = new Date(cellA);
+                const dateB = new Date(cellB);
+                return newDirection === 'asc' ? dateA - dateB : dateB - dateA;
+            } else if (columnIndex === 2) {
+                // Handle sorting for 'User Email' column (String sorting)
+                return newDirection === 'asc' 
+                    ? cellA.localeCompare(cellB) 
+                    : cellB.localeCompare(cellA);
+            } else if (columnIndex === 3) {
+                // Handle sorting for 'Product Name' column (String sorting)
+                return newDirection === 'asc' 
+                    ? cellA.localeCompare(cellB) 
+                    : cellB.localeCompare(cellA);
+            }
+            return 0;  // If it's not a sortable column, don't apply sorting
+        });
+
+        // Reattach the rows after sorting
+        rows.forEach(row => table.appendChild(row));
+
+        // Optionally, change the table header style to reflect the sorting order (ascending/descending)
+        updateSortIndicators(columnIndex, newDirection);
+    }
+
+    function updateSortIndicators(columnIndex, direction) {
+        // Get all headers (th elements)
+        const headers = document.querySelectorAll("#approved-product-table th");
+        
+        // Remove any existing sorting indicator classes
+        headers.forEach(header => header.classList.remove("ascending", "descending"));
+        
+        // Add the corresponding sorting class to the clicked header
+        if (direction === 'asc') {
+            headers[columnIndex].classList.add("ascending");
+        } else {
+            headers[columnIndex].classList.add("descending");
+        }
+    }
+
+    // Call the sortTable function when the page loads to sort by Submitted Date (default)
+    window.onload = function() {
+        sortTable(0);  // Automatically sort by Submitted Date (column index 0) when the page loads
+    }
+</script>
+
 {% endblock %}
