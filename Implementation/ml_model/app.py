@@ -147,9 +147,15 @@ def predict_category():
 
         # Find the match with the highest score
         final_match, final_score = max(matches, key=lambda x: x[1])
+        
+        filtered_final_match = {key: value for key, value in final_match.items()
+                    if key not in ["image_url", "embedding_pc", "embedding_pd", "embedding_img"]}
+        
+        print("\nFinal Match:")
+        for key, value in filtered_final_match.items():
+            print(f"{key}: {value}")
 
-        print("Final Match:", final_match)
-        print("Final Score:", final_score)
+        print(f"\nFinal Score: {final_score}\n")
 
         return jsonify({
             "product_category": final_match["product_category"],
