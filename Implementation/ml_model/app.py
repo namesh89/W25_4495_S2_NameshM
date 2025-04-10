@@ -138,6 +138,10 @@ def predict_category():
         text_match_pd, text_score_pd = find_best_match_pd(desc, products)
         image_match, image_score = find_best_match_image(image_url, products)
 
+        print("Based on Product Category: ", text_match_pc["product_category"], "   |   ", text_score_pc)
+        print("Based on Product Description: ", text_match_pd["product_category"], "   |   ", text_score_pd)
+        print("Based on Product Image: ", image_match["product_category"], "   |   ", image_score)
+
         # Create a list of matches and scores
         matches = [
             (text_match_pc, text_score_pc),
@@ -158,7 +162,7 @@ def predict_category():
         print(f"\nFinal Score: {final_score}\n")
 
         return jsonify({
-            "product_category": final_match["product_category"],
+            "product_category": filtered_final_match["product_category"],
             "match_score": round(final_score, 2)
         }), 200
 

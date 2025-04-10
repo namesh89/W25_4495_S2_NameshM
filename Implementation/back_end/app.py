@@ -138,7 +138,7 @@ def get_user_products():
     query = f"PartitionKey eq '{user_email}' and Status eq 'Pending'"
     products = list(product_table.query_entities(query))
     
-    pprint.pprint(products)
+    #pprint.pprint(products)
 
     product_list = [{
         "product_id": product["RowKey"],

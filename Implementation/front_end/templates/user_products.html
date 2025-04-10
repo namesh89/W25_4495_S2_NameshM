@@ -4,6 +4,8 @@
 
 {% block content %}
 <h2>Submitted Product Inquiries</h2>
+<input type="text" id="searchInput" class="form-control mb-3" placeholder="Search products..." onkeyup="filterTable()">
+
 <table class="table" id="product-table">
     <thead>
         <tr>
@@ -100,6 +102,30 @@
     window.onload = function() {
         sortTable(0);  // Automatically sort by Submitted Date (column index 0) when the page loads
     }
+
+    function filterTable() {
+        const input = document.getElementById("searchInput");
+        const filter = input.value.toLowerCase();
+        const table = document.getElementById("product-table");
+        const rows = table.getElementsByTagName("tr");
+
+        for (let i = 1; i < rows.length; i++) {
+            const row = rows[i];
+            const cells = row.getElementsByTagName("td");
+            let match = false;
+
+            // Check columns: 0 (Submitted Date), 1 (Product Name), 2 (Description)
+            for (let j of [0, 1, 2]) {
+                if (cells[j] && cells[j].innerText.toLowerCase().indexOf(filter) > -1) {
+                    match = true;
+                    break;
+                }
+            }
+
+            row.style.display = match ? "" : "none";
+        }
+    }
+
 </script>
 
 {% endblock %}
